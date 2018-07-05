@@ -10,7 +10,10 @@ data_file <- "household_power_consumption.txt"
 power_df <- fread(data_file, colClasses = "character", data.table = FALSE)
 power_df <- power_df %>%
       distinct(.keep_all = TRUE) %>% # remove duplicate rows
-      filter_all(all_vars(. != "?")) # remove rows with at least one "?"
+      ## date and time must be known
+      filter_at(vars(Date, Time), all_vars(. != "?")) %>%
+      # remove rows completely equal to "?"
+      filter_at(vars(Global_active_power:Sub_metering_3), any_vars(. != "?"))
 ## put the dates into YYYY-MM-DD form using the lubridate package
 power_df$Date <- dmy(power_df$Date)
 ## set the required dates
